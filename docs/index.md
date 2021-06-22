@@ -2,7 +2,7 @@
 organization: Turbot
 category: ["public cloud"]
 icon_url: "/images/plugins/turbot/stripe.svg"
-brand_color: "#2684FF"
+brand_color: "#635BFF"
 display_name: "Stripe"
 short_name: "stripe"
 description: "Steampipe plugin for querying customers, products, invoices and more from Stripe."
