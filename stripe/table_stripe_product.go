@@ -15,7 +15,7 @@ func tableStripeProduct(ctx context.Context) *plugin.Table {
 		Description: "Products available for purchase or subscription.",
 		List: &plugin.ListConfig{
 			Hydrate:            listProduct,
-			OptionalKeyColumns: plugin.AnyColumn([]string{"active", "shippable", "url"}),
+			OptionalKeyColumns: plugin.AnyColumn([]string{"active", "created", "shippable", "url"}),
 		},
 		Get: &plugin.GetConfig{
 			Hydrate:    getProduct,
@@ -68,6 +68,39 @@ func listProduct(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	if q["url"] != nil {
 		// Note: I can't work out how to set and test a URL for a product?
 		params.URL = stripe.String(q["url"].GetStringValue())
+	}
+
+	// Comparison values
+	quals := d.QueryContext.GetQuals()
+	if quals["created"] != nil {
+		for _, q := range quals["created"].Quals {
+			op := q.GetStringValue()
+			tsSecs := q.Value.GetTimestampValue().GetSeconds()
+			switch op {
+			case ">":
+				if params.CreatedRange == nil {
+					params.CreatedRange = &stripe.RangeQueryParams{}
+				}
+				params.CreatedRange.GreaterThan = tsSecs
+			case ">=":
+				if params.CreatedRange == nil {
+					params.CreatedRange = &stripe.RangeQueryParams{}
+				}
+				params.CreatedRange.GreaterThanOrEqual = tsSecs
+			case "=":
+				params.Created = stripe.Int64(tsSecs)
+			case "<=":
+				if params.CreatedRange == nil {
+					params.CreatedRange = &stripe.RangeQueryParams{}
+				}
+				params.CreatedRange.LesserThanOrEqual = tsSecs
+			case "<":
+				if params.CreatedRange == nil {
+					params.CreatedRange = &stripe.RangeQueryParams{}
+				}
+				params.CreatedRange.LesserThan = tsSecs
+			}
+		}
 	}
 
 	i := conn.Products.List(params)

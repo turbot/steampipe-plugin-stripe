@@ -1,6 +1,6 @@
 # Table: stripe_plan
 
-Query information about plans defined in the Stripe account.
+Pricing plans defined in the Strip account.
 
 ## Examples
 

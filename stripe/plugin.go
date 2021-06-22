@@ -19,12 +19,13 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			ShouldIgnoreError: isNotFoundError,
 		},
 		TableMap: map[string]*plugin.Table{
-			"stripe_account":  tableStripeAccount(ctx),
-			"stripe_coupon":   tableStripeCoupon(ctx),
-			"stripe_customer": tableStripeCustomer(ctx),
-			"stripe_invoice":  tableStripeInvoice(ctx),
-			"stripe_plan":     tableStripePlan(ctx),
-			"stripe_product":  tableStripeProduct(ctx),
+			"stripe_account":      tableStripeAccount(ctx),
+			"stripe_coupon":       tableStripeCoupon(ctx),
+			"stripe_customer":     tableStripeCustomer(ctx),
+			"stripe_invoice":      tableStripeInvoice(ctx),
+			"stripe_plan":         tableStripePlan(ctx),
+			"stripe_product":      tableStripeProduct(ctx),
+			"stripe_subscription": tableStripeSubscription(ctx),
 		},
 	}
 	return p

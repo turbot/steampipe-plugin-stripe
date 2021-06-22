@@ -15,7 +15,7 @@ func tableStripeInvoice(ctx context.Context) *plugin.Table {
 		Description: "Invoices available for purchase or subscription.",
 		List: &plugin.ListConfig{
 			Hydrate:            listInvoice,
-			OptionalKeyColumns: plugin.AnyColumn([]string{"status", "collection_method", "created"}),
+			OptionalKeyColumns: plugin.AnyColumn([]string{"collection_method", "created", "due_date", "subscription_id", "status"}),
 		},
 		Get: &plugin.GetConfig{
 			Hydrate:    getInvoice,
@@ -74,7 +74,8 @@ func tableStripeInvoice(ctx context.Context) *plugin.Table {
 			{Name: "starting_balance", Type: proto.ColumnType_INT, Transform: transform.FromField("StartingBalance"), Description: "Starting customer balance before the invoice is finalized. If the invoice has not been finalized yet, this will be the current customer balance."},
 			{Name: "statement_descriptor", Type: proto.ColumnType_STRING, Description: "Extra information about an invoice for the customer’s credit card statement."},
 			{Name: "status_transitions", Type: proto.ColumnType_JSON, Description: "The timestamps at which the invoice status was updated."},
-			{Name: "subscription", Type: proto.ColumnType_JSON, Description: "The subscription that this invoice was prepared for, if any."},
+			//{Name: "subscription", Type: proto.ColumnType_JSON, Description: "The subscription that this invoice was prepared for, if any."},
+			{Name: "subscription_id", Type: proto.ColumnType_STRING, Transform: transform.FromField("Subscription.ID"), Description: "ID of the subscription that this invoice was prepared for, if any."},
 			{Name: "subscription_proration_date", Type: proto.ColumnType_TIMESTAMP, Transform: transform.FromField("SubscriptionProrationDate").Transform(transform.UnixToTimestamp), Description: "Only set for upcoming invoices that preview prorations. The time used to calculate prorations."},
 			{Name: "subtotal", Type: proto.ColumnType_INT, Transform: transform.FromField("Subtotal"), Description: "Total of all subscriptions, invoice items, and prorations on the invoice before any invoice level discount or tax is applied. Item discounts are already incorporated"},
 			{Name: "tax", Type: proto.ColumnType_INT, Transform: transform.FromField("Tax"), Description: "The amount of tax on this invoice. This is the sum of all the tax amounts on this invoice."},
@@ -110,11 +111,13 @@ func listInvoice(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	if q["collection_method"] != nil {
 		params.CollectionMethod = stripe.String(q["collection_method"].GetStringValue())
 	}
+	if q["subscription_id"] != nil {
+		params.Subscription = stripe.String(q["subscription_id"].GetStringValue())
+	}
 
-	// Comparison values need to use standard quals
-	// NOTE: not working yet, quals not getting passed through all the time?
+	// Comparison values
 	quals := d.QueryContext.GetQuals()
-	//plugin.Logger(ctx).Warn("stripe_invoice.listInvoice", "quals", quals)
+
 	if quals["created"] != nil {
 		for _, q := range quals["created"].Quals {
 			op := q.GetStringValue()
@@ -144,8 +147,37 @@ func listInvoice(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 				params.CreatedRange.LesserThan = tsSecs
 			}
 		}
-		//plugin.Logger(ctx).Warn("stripe_invoice.listInvoice", "params.Created", params.Created)
-		//plugin.Logger(ctx).Warn("stripe_invoice.listInvoice", "params.CreatedRange", params.CreatedRange)
+	}
+
+	if quals["due_date"] != nil {
+		for _, q := range quals["due_date"].Quals {
+			op := q.GetStringValue()
+			tsSecs := q.Value.GetTimestampValue().GetSeconds()
+			switch op {
+			case ">":
+				if params.DueDateRange == nil {
+					params.DueDateRange = &stripe.RangeQueryParams{}
+				}
+				params.DueDateRange.GreaterThan = tsSecs
+			case ">=":
+				if params.DueDateRange == nil {
+					params.DueDateRange = &stripe.RangeQueryParams{}
+				}
+				params.DueDateRange.GreaterThanOrEqual = tsSecs
+			case "=":
+				params.DueDate = stripe.Int64(tsSecs)
+			case "<=":
+				if params.DueDateRange == nil {
+					params.DueDateRange = &stripe.RangeQueryParams{}
+				}
+				params.DueDateRange.LesserThanOrEqual = tsSecs
+			case "<":
+				if params.DueDateRange == nil {
+					params.DueDateRange = &stripe.RangeQueryParams{}
+				}
+				params.DueDateRange.LesserThan = tsSecs
+			}
+		}
 	}
 
 	i := conn.Invoices.List(params)
@@ -156,6 +188,7 @@ func listInvoice(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		plugin.Logger(ctx).Error("stripe_customer.listInvoice", "query_error", err, "params", params, "i", i)
 		return nil, err
 	}
+
 	return nil, nil
 }
 

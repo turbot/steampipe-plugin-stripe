@@ -15,7 +15,7 @@ func tableStripePlan(ctx context.Context) *plugin.Table {
 		Description: "Plans define the base price, currency, and billing cycle for recurring purchases of products.",
 		List: &plugin.ListConfig{
 			Hydrate:            listPlan,
-			OptionalKeyColumns: plugin.AnyColumn([]string{"active", "product_id"}),
+			OptionalKeyColumns: plugin.AnyColumn([]string{"active", "created", "product_id"}),
 		},
 		Get: &plugin.GetConfig{
 			Hydrate:    getPlan,
@@ -68,6 +68,39 @@ func listPlan(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 	}
 	if q["product_id"] != nil {
 		params.Product = stripe.String(q["product_id"].GetStringValue())
+	}
+
+	// Comparison values
+	quals := d.QueryContext.GetQuals()
+	if quals["created"] != nil {
+		for _, q := range quals["created"].Quals {
+			op := q.GetStringValue()
+			tsSecs := q.Value.GetTimestampValue().GetSeconds()
+			switch op {
+			case ">":
+				if params.CreatedRange == nil {
+					params.CreatedRange = &stripe.RangeQueryParams{}
+				}
+				params.CreatedRange.GreaterThan = tsSecs
+			case ">=":
+				if params.CreatedRange == nil {
+					params.CreatedRange = &stripe.RangeQueryParams{}
+				}
+				params.CreatedRange.GreaterThanOrEqual = tsSecs
+			case "=":
+				params.Created = stripe.Int64(tsSecs)
+			case "<=":
+				if params.CreatedRange == nil {
+					params.CreatedRange = &stripe.RangeQueryParams{}
+				}
+				params.CreatedRange.LesserThanOrEqual = tsSecs
+			case "<":
+				if params.CreatedRange == nil {
+					params.CreatedRange = &stripe.RangeQueryParams{}
+				}
+				params.CreatedRange.LesserThan = tsSecs
+			}
+		}
 	}
 
 	i := conn.Plans.List(params)

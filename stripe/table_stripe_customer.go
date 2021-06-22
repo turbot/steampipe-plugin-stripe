@@ -14,7 +14,8 @@ func tableStripeCustomer(ctx context.Context) *plugin.Table {
 		Name:        "stripe_customer",
 		Description: "Customer details.",
 		List: &plugin.ListConfig{
-			Hydrate: listCustomer,
+			Hydrate:            listCustomer,
+			OptionalKeyColumns: plugin.AnyColumn([]string{"created", "email"}),
 		},
 		Get: &plugin.GetConfig{
 			Hydrate:    getCustomer,
@@ -61,9 +62,48 @@ func listCustomer(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		ListParams: stripe.ListParams{
 			Context: ctx,
 			Limit:   stripe.Int64(100),
-			//Expand:  stripe.StringSlice([]string{"data.sources", "data.subscriptions"}),
 		},
 	}
+
+	// Exact values can leverage optional key quals for optimal caching
+	q := d.OptionalKeyColumnQuals
+	if q["email"] != nil {
+		params.Email = stripe.String(q["email"].GetStringValue())
+	}
+
+	// Comparison values
+	quals := d.QueryContext.GetQuals()
+	if quals["created"] != nil {
+		for _, q := range quals["created"].Quals {
+			op := q.GetStringValue()
+			tsSecs := q.Value.GetTimestampValue().GetSeconds()
+			switch op {
+			case ">":
+				if params.CreatedRange == nil {
+					params.CreatedRange = &stripe.RangeQueryParams{}
+				}
+				params.CreatedRange.GreaterThan = tsSecs
+			case ">=":
+				if params.CreatedRange == nil {
+					params.CreatedRange = &stripe.RangeQueryParams{}
+				}
+				params.CreatedRange.GreaterThanOrEqual = tsSecs
+			case "=":
+				params.Created = stripe.Int64(tsSecs)
+			case "<=":
+				if params.CreatedRange == nil {
+					params.CreatedRange = &stripe.RangeQueryParams{}
+				}
+				params.CreatedRange.LesserThanOrEqual = tsSecs
+			case "<":
+				if params.CreatedRange == nil {
+					params.CreatedRange = &stripe.RangeQueryParams{}
+				}
+				params.CreatedRange.LesserThan = tsSecs
+			}
+		}
+	}
+
 	i := conn.Customers.List(params)
 	for i.Next() {
 		d.StreamListItem(ctx, i.Customer())

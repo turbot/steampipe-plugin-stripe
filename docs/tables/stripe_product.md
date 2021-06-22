@@ -13,7 +13,7 @@ from
   stripe_product
 ```
 
-### List all products that are not active
+### All products that are not active
 
 ```sql
 select
