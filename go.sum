@@ -122,14 +122,11 @@ github.com/stripe/stripe-go v70.15.0+incompatible h1:hNML7M1zx8RgtepEMlxyu/FpVPr
 github.com/stripe/stripe-go v70.15.0+incompatible/go.mod h1:A1dQZmO/QypXmsL0T8axYZkSN/uA/T/A64pfKdBAMiY=
 github.com/tkrajina/go-reflector v0.5.4 h1:dS9aJEa/eYNQU/fwsb5CSiATOxcNyA/gG/A7a582D5s=
 github.com/tkrajina/go-reflector v0.5.4/go.mod h1:9PyLgEOzc78ey/JmQQHbW8cQJ1oucLlNQsg8yFvkVk8=
-github.com/turbot/go-kit v0.1.1 h1:JkLUyVp8m8jEj45C52dzh7Tj9jpxHP90y9+m8cpW1mo=
 github.com/turbot/go-kit v0.1.1/go.mod h1:hO/mY90fJXLWAJnAoDkYMvi3LVZ/r+z1tiz3E1uPSNA=
 github.com/turbot/go-kit v0.2.1 h1:NLcS25WrknLaGdDyi9ld0FePU+bbjgfm/FzMMD4b3VY=
 github.com/turbot/go-kit v0.2.1/go.mod h1:FboSf8p5XWOezO9V/N+rtG07FDKBuBiPhQrSJxQgm+I=
-github.com/turbot/steampipe-plugin-sdk v0.3.0-rc.0.0.20210618102921-1cc4077273a6 h1:Z5T9rISE+Li+ns0SO4vQZFQX3TYpJEotOhi4Cf/qZ5E=
-github.com/turbot/steampipe-plugin-sdk v0.3.0-rc.0.0.20210618102921-1cc4077273a6/go.mod h1:nnKgiWjJ+TGKHyI8qg1nzOGTeF/cRKy5WrHC1ibsAeM=
-github.com/turbot/steampipe-plugin-sdk v0.3.0-rc.0.0.20210621130538-6f674aaafaac h1:RawSk54bAL/3WtZzpKWvqeyx6fCmFeTuDB1s7yeWBZU=
-github.com/turbot/steampipe-plugin-sdk v0.3.0-rc.0.0.20210621130538-6f674aaafaac/go.mod h1:nnKgiWjJ+TGKHyI8qg1nzOGTeF/cRKy5WrHC1ibsAeM=
+github.com/turbot/steampipe-plugin-sdk v0.3.0-rc.0.0.20210623161616-8a9ee475b1ca h1:UEc6U2+Af0RhpttsFeAkBGwVfm637jtyRFtc8buRbDw=
+github.com/turbot/steampipe-plugin-sdk v0.3.0-rc.0.0.20210623161616-8a9ee475b1ca/go.mod h1:nnKgiWjJ+TGKHyI8qg1nzOGTeF/cRKy5WrHC1ibsAeM=
 github.com/vmihailenco/msgpack v3.3.3+incompatible/go.mod h1:fy3FlTQTDXWkZ7Bh6AcGMlsjHatGryHQYUTf1ShIgkk=
 github.com/vmihailenco/msgpack/v4 v4.3.12/go.mod h1:gborTTJjAo/GWTqqRjrLCn9pgNN+NXzzngzBKDPIqw4=
 github.com/vmihailenco/tagparser v0.1.1/go.mod h1:OeAg3pn3UbLjkWt+rN9oFYB6u/cQgqMEUPoW2WPyhdI=

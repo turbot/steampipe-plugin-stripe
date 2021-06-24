@@ -72,7 +72,7 @@ func listCustomer(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	}
 
 	// Comparison values
-	quals := d.QueryContext.GetQuals()
+	quals := d.QueryContext.RawQuals
 	if quals["created"] != nil {
 		for _, q := range quals["created"].Quals {
 			op := q.GetStringValue()

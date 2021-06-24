@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/stripe/stripe-go"
+
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -116,7 +117,7 @@ func listInvoice(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	}
 
 	// Comparison values
-	quals := d.QueryContext.GetQuals()
+	quals := d.QueryContext.RawQuals
 
 	if quals["created"] != nil {
 		for _, q := range quals["created"].Quals {
@@ -180,9 +181,28 @@ func listInvoice(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		}
 	}
 
+	limit := d.QueryContext.Limit
+	plugin.Logger(ctx).Warn("stripe_customer.listInvoice", "limit", limit)
+	if d.QueryContext.Limit != nil {
+		if *limit < *params.ListParams.Limit {
+			params.ListParams.Limit = limit
+		}
+		plugin.Logger(ctx).Warn("stripe_customer.listInvoice", "limit", *limit)
+	}
+
+	plugin.Logger(ctx).Warn("stripe_customer.listInvoice", "params.ListParams.Limit", *params.ListParams.Limit)
+
+	var count int64
+
 	i := conn.Invoices.List(params)
 	for i.Next() {
 		d.StreamListItem(ctx, i.Invoice())
+		count++
+		if limit != nil {
+			if count >= *limit {
+				break
+			}
+		}
 	}
 	if err := i.Err(); err != nil {
 		plugin.Logger(ctx).Error("stripe_customer.listInvoice", "query_error", err, "params", params, "i", i)

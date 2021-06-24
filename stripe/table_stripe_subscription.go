@@ -92,7 +92,7 @@ func listSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	}
 
 	// Comparison values
-	quals := d.QueryContext.GetQuals()
+	quals := d.QueryContext.RawQuals
 
 	if quals["created"] != nil {
 		for _, q := range quals["created"].Quals {
