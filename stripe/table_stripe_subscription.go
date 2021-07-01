@@ -14,8 +14,8 @@ func tableStripeSubscription(ctx context.Context) *plugin.Table {
 		Name:        "stripe_subscription",
 		Description: "Subscriptions available for purchase or subscription.",
 		List: &plugin.ListConfig{
-			Hydrate:            listSubscription,
-			OptionalKeyColumns: plugin.AnyColumn([]string{"customer_id", "collection_method", "status"}),
+			Hydrate:    listSubscription,
+			KeyColumns: plugin.OptionalColumns([]string{"customer_id", "collection_method", "status"}),
 		},
 		Get: &plugin.GetConfig{
 			Hydrate:    getSubscription,
@@ -80,7 +80,7 @@ func listSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	}
 
 	// Exact values can leverage optional key quals for optimal caching
-	q := d.OptionalKeyColumnQuals
+	q := d.KeyColumnQuals
 	if q["status"] != nil {
 		params.Status = q["status"].GetStringValue()
 	}
@@ -92,13 +92,12 @@ func listSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	}
 
 	// Comparison values
-	quals := d.QueryContext.RawQuals
+	quals := d.Quals
 
 	if quals["created"] != nil {
 		for _, q := range quals["created"].Quals {
-			op := q.GetStringValue()
 			tsSecs := q.Value.GetTimestampValue().GetSeconds()
-			switch op {
+			switch q.Operator {
 			case ">":
 				if params.CreatedRange == nil {
 					params.CreatedRange = &stripe.RangeQueryParams{}
@@ -127,9 +126,8 @@ func listSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 
 	if quals["current_period_start"] != nil {
 		for _, q := range quals["current_period_start"].Quals {
-			op := q.GetStringValue()
 			tsSecs := q.Value.GetTimestampValue().GetSeconds()
-			switch op {
+			switch q.Operator {
 			case ">":
 				if params.CurrentPeriodStartRange == nil {
 					params.CurrentPeriodStartRange = &stripe.RangeQueryParams{}
@@ -158,9 +156,8 @@ func listSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 
 	if quals["current_period_end"] != nil {
 		for _, q := range quals["current_period_end"].Quals {
-			op := q.GetStringValue()
 			tsSecs := q.Value.GetTimestampValue().GetSeconds()
-			switch op {
+			switch q.Operator {
 			case ">":
 				if params.CurrentPeriodEndRange == nil {
 					params.CurrentPeriodEndRange = &stripe.RangeQueryParams{}

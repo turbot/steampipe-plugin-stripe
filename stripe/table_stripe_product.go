@@ -14,8 +14,8 @@ func tableStripeProduct(ctx context.Context) *plugin.Table {
 		Name:        "stripe_product",
 		Description: "Products available for purchase or subscription.",
 		List: &plugin.ListConfig{
-			Hydrate:            listProduct,
-			OptionalKeyColumns: plugin.AnyColumn([]string{"active", "created", "shippable", "url"}),
+			Hydrate:    listProduct,
+			KeyColumns: plugin.OptionalColumns([]string{"active", "created", "shippable", "url"}),
 		},
 		Get: &plugin.GetConfig{
 			Hydrate:    getProduct,
@@ -58,7 +58,7 @@ func listProduct(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	}
 
 	// Exact values can leverage optional key quals for optimal caching
-	q := d.OptionalKeyColumnQuals
+	q := d.KeyColumnQuals
 	if q["active"] != nil {
 		params.Active = stripe.Bool(q["active"].GetBoolValue())
 	}
@@ -71,12 +71,11 @@ func listProduct(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	}
 
 	// Comparison values
-	quals := d.QueryContext.RawQuals
+	quals := d.Quals
 	if quals["created"] != nil {
 		for _, q := range quals["created"].Quals {
-			op := q.GetStringValue()
 			tsSecs := q.Value.GetTimestampValue().GetSeconds()
-			switch op {
+			switch q.Operator {
 			case ">":
 				if params.CreatedRange == nil {
 					params.CreatedRange = &stripe.RangeQueryParams{}
@@ -102,6 +101,9 @@ func listProduct(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 			}
 		}
 	}
+
+	plugin.Logger(ctx).Warn("stripe_customer.listInvoice", "q", q)
+	plugin.Logger(ctx).Warn("stripe_customer.listInvoice", "quals", quals)
 
 	i := conn.Products.List(params)
 	for i.Next() {

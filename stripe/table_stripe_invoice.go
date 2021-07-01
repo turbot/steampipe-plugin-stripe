@@ -15,8 +15,8 @@ func tableStripeInvoice(ctx context.Context) *plugin.Table {
 		Name:        "stripe_invoice",
 		Description: "Invoices available for purchase or subscription.",
 		List: &plugin.ListConfig{
-			Hydrate:            listInvoice,
-			OptionalKeyColumns: plugin.AnyColumn([]string{"collection_method", "created", "due_date", "subscription_id", "status"}),
+			Hydrate:    listInvoice,
+			KeyColumns: plugin.OptionalColumns([]string{"collection_method", "created", "due_date", "subscription_id", "status"}),
 		},
 		Get: &plugin.GetConfig{
 			Hydrate:    getInvoice,
@@ -104,26 +104,28 @@ func listInvoice(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		},
 	}
 
-	// Exact values can leverage optional key quals for optimal caching
-	q := d.OptionalKeyColumnQuals
-	if q["status"] != nil {
-		params.Status = stripe.String(q["status"].GetStringValue())
+	exactQuals := d.KeyColumnQuals
+	if exactQuals["status"] != nil {
+		params.Status = stripe.String(exactQuals["status"].GetStringValue())
 	}
-	if q["collection_method"] != nil {
-		params.CollectionMethod = stripe.String(q["collection_method"].GetStringValue())
+	if exactQuals["collection_method"] != nil {
+		params.CollectionMethod = stripe.String(exactQuals["collection_method"].GetStringValue())
 	}
-	if q["subscription_id"] != nil {
-		params.Subscription = stripe.String(q["subscription_id"].GetStringValue())
+	if exactQuals["subscription_id"] != nil {
+		params.Subscription = stripe.String(exactQuals["subscription_id"].GetStringValue())
 	}
 
 	// Comparison values
-	quals := d.QueryContext.RawQuals
+	quals := d.Quals
+
+	plugin.Logger(ctx).Warn("stripe_customer.listInvoice", "quals", quals)
 
 	if quals["created"] != nil {
 		for _, q := range quals["created"].Quals {
-			op := q.GetStringValue()
 			tsSecs := q.Value.GetTimestampValue().GetSeconds()
-			switch op {
+			plugin.Logger(ctx).Warn("stripe_customer.listInvoice", "created.Operator", q.Operator)
+			plugin.Logger(ctx).Warn("stripe_customer.listInvoice", "created.Value", tsSecs)
+			switch q.Operator {
 			case ">":
 				if params.CreatedRange == nil {
 					params.CreatedRange = &stripe.RangeQueryParams{}
@@ -152,9 +154,8 @@ func listInvoice(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 
 	if quals["due_date"] != nil {
 		for _, q := range quals["due_date"].Quals {
-			op := q.GetStringValue()
 			tsSecs := q.Value.GetTimestampValue().GetSeconds()
-			switch op {
+			switch q.Operator {
 			case ">":
 				if params.DueDateRange == nil {
 					params.DueDateRange = &stripe.RangeQueryParams{}

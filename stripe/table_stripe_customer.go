@@ -14,8 +14,8 @@ func tableStripeCustomer(ctx context.Context) *plugin.Table {
 		Name:        "stripe_customer",
 		Description: "Customer details.",
 		List: &plugin.ListConfig{
-			Hydrate:            listCustomer,
-			OptionalKeyColumns: plugin.AnyColumn([]string{"created", "email"}),
+			Hydrate:    listCustomer,
+			KeyColumns: plugin.OptionalColumns([]string{"created", "email"}),
 		},
 		Get: &plugin.GetConfig{
 			Hydrate:    getCustomer,
@@ -66,18 +66,17 @@ func listCustomer(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	}
 
 	// Exact values can leverage optional key quals for optimal caching
-	q := d.OptionalKeyColumnQuals
+	q := d.KeyColumnQuals
 	if q["email"] != nil {
 		params.Email = stripe.String(q["email"].GetStringValue())
 	}
 
 	// Comparison values
-	quals := d.QueryContext.RawQuals
+	quals := d.Quals
 	if quals["created"] != nil {
 		for _, q := range quals["created"].Quals {
-			op := q.GetStringValue()
 			tsSecs := q.Value.GetTimestampValue().GetSeconds()
-			switch op {
+			switch q.Operator {
 			case ">":
 				if params.CreatedRange == nil {
 					params.CreatedRange = &stripe.RangeQueryParams{}

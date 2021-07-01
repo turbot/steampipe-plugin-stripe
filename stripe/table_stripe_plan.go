@@ -14,8 +14,8 @@ func tableStripePlan(ctx context.Context) *plugin.Table {
 		Name:        "stripe_plan",
 		Description: "Plans define the base price, currency, and billing cycle for recurring purchases of products.",
 		List: &plugin.ListConfig{
-			Hydrate:            listPlan,
-			OptionalKeyColumns: plugin.AnyColumn([]string{"active", "created", "product_id"}),
+			Hydrate:    listPlan,
+			KeyColumns: plugin.OptionalColumns([]string{"active", "created", "product_id"}),
 		},
 		Get: &plugin.GetConfig{
 			Hydrate:    getPlan,
@@ -62,7 +62,7 @@ func listPlan(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 	}
 
 	// Exact values can leverage optional key quals for optimal caching
-	q := d.OptionalKeyColumnQuals
+	q := d.KeyColumnQuals
 	if q["active"] != nil {
 		params.Active = stripe.Bool(q["active"].GetBoolValue())
 	}
@@ -71,12 +71,11 @@ func listPlan(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 	}
 
 	// Comparison values
-	quals := d.QueryContext.RawQuals
+	quals := d.Quals
 	if quals["created"] != nil {
 		for _, q := range quals["created"].Quals {
-			op := q.GetStringValue()
 			tsSecs := q.Value.GetTimestampValue().GetSeconds()
-			switch op {
+			switch q.Operator {
 			case ">":
 				if params.CreatedRange == nil {
 					params.CreatedRange = &stripe.RangeQueryParams{}
