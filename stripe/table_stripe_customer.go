@@ -14,8 +14,11 @@ func tableStripeCustomer(ctx context.Context) *plugin.Table {
 		Name:        "stripe_customer",
 		Description: "Customer details.",
 		List: &plugin.ListConfig{
-			Hydrate:    listCustomer,
-			KeyColumns: plugin.OptionalColumns([]string{"created", "email"}),
+			Hydrate: listCustomer,
+			KeyColumns: []*plugin.KeyColumn{
+				{Name: "created", Operators: []string{">", ">=", "=", "<", "<="}, Require: plugin.Optional},
+				{Name: "email", Require: plugin.Optional},
+			},
 		},
 		Get: &plugin.GetConfig{
 			Hydrate:    getCustomer,
@@ -65,7 +68,6 @@ func listCustomer(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		},
 	}
 
-	// Exact values can leverage optional key quals for optimal caching
 	q := d.KeyColumnQuals
 	if q["email"] != nil {
 		params.Email = stripe.String(q["email"].GetStringValue())
@@ -73,6 +75,7 @@ func listCustomer(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 	// Comparison values
 	quals := d.Quals
+
 	if quals["created"] != nil {
 		for _, q := range quals["created"].Quals {
 			tsSecs := q.Value.GetTimestampValue().GetSeconds()
@@ -103,14 +106,29 @@ func listCustomer(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		}
 	}
 
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *params.ListParams.Limit {
+			params.ListParams.Limit = limit
+		}
+	}
+
+	var count int64
 	i := conn.Customers.List(params)
 	for i.Next() {
 		d.StreamListItem(ctx, i.Customer())
+		count++
+		if limit != nil {
+			if count >= *limit {
+				break
+			}
+		}
 	}
 	if err := i.Err(); err != nil {
 		plugin.Logger(ctx).Error("stripe_customer.listCustomer", "query_error", err, "params", params, "i", i)
 		return nil, err
 	}
+
 	return nil, nil
 }
 

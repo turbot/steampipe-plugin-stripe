@@ -14,8 +14,12 @@ func tableStripePlan(ctx context.Context) *plugin.Table {
 		Name:        "stripe_plan",
 		Description: "Plans define the base price, currency, and billing cycle for recurring purchases of products.",
 		List: &plugin.ListConfig{
-			Hydrate:    listPlan,
-			KeyColumns: plugin.OptionalColumns([]string{"active", "created", "product_id"}),
+			Hydrate: listPlan,
+			KeyColumns: []*plugin.KeyColumn{
+				{Name: "active", Operators: []string{"=", "<>"}, Require: plugin.Optional},
+				{Name: "created", Operators: []string{">", ">=", "=", "<", "<="}, Require: plugin.Optional},
+				{Name: "product_id", Require: plugin.Optional},
+			},
 		},
 		Get: &plugin.GetConfig{
 			Hydrate:    getPlan,
@@ -61,17 +65,25 @@ func listPlan(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 		},
 	}
 
-	// Exact values can leverage optional key quals for optimal caching
-	q := d.KeyColumnQuals
-	if q["active"] != nil {
-		params.Active = stripe.Bool(q["active"].GetBoolValue())
-	}
-	if q["product_id"] != nil {
-		params.Product = stripe.String(q["product_id"].GetStringValue())
+	equalQuals := d.KeyColumnQuals
+	if equalQuals["product_id"] != nil {
+		params.Product = stripe.String(equalQuals["product_id"].GetStringValue())
 	}
 
 	// Comparison values
 	quals := d.Quals
+
+	if quals["active"] != nil {
+		for _, q := range quals["active"].Quals {
+			switch q.Operator {
+			case "=":
+				params.Active = stripe.Bool(q.Value.GetBoolValue())
+			case "<>":
+				params.Active = stripe.Bool(!q.Value.GetBoolValue())
+			}
+		}
+	}
+
 	if quals["created"] != nil {
 		for _, q := range quals["created"].Quals {
 			tsSecs := q.Value.GetTimestampValue().GetSeconds()
@@ -102,14 +114,29 @@ func listPlan(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 		}
 	}
 
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *params.ListParams.Limit {
+			params.ListParams.Limit = limit
+		}
+	}
+
+	var count int64
 	i := conn.Plans.List(params)
 	for i.Next() {
 		d.StreamListItem(ctx, i.Plan())
+		count++
+		if limit != nil {
+			if count >= *limit {
+				break
+			}
+		}
 	}
 	if err := i.Err(); err != nil {
 		plugin.Logger(ctx).Error("stripe_plan.listPlan", "query_error", err, "params", params, "i", i)
 		return nil, err
 	}
+
 	return nil, nil
 }
 

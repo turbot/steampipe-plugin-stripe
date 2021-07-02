@@ -15,8 +15,14 @@ func tableStripeInvoice(ctx context.Context) *plugin.Table {
 		Name:        "stripe_invoice",
 		Description: "Invoices available for purchase or subscription.",
 		List: &plugin.ListConfig{
-			Hydrate:    listInvoice,
-			KeyColumns: plugin.OptionalColumns([]string{"collection_method", "created", "due_date", "subscription_id", "status"}),
+			Hydrate: listInvoice,
+			KeyColumns: []*plugin.KeyColumn{
+				{Name: "collection_method", Require: plugin.Optional},
+				{Name: "created", Operators: []string{">", ">=", "=", "<", "<="}, Require: plugin.Optional},
+				{Name: "due_date", Operators: []string{">", ">=", "=", "<", "<="}, Require: plugin.Optional},
+				{Name: "subscription_id", Require: plugin.Optional},
+				{Name: "status", Require: plugin.Optional},
+			},
 		},
 		Get: &plugin.GetConfig{
 			Hydrate:    getInvoice,
@@ -104,27 +110,23 @@ func listInvoice(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		},
 	}
 
-	exactQuals := d.KeyColumnQuals
-	if exactQuals["status"] != nil {
-		params.Status = stripe.String(exactQuals["status"].GetStringValue())
+	equalQuals := d.KeyColumnQuals
+	if equalQuals["status"] != nil {
+		params.Status = stripe.String(equalQuals["status"].GetStringValue())
 	}
-	if exactQuals["collection_method"] != nil {
-		params.CollectionMethod = stripe.String(exactQuals["collection_method"].GetStringValue())
+	if equalQuals["collection_method"] != nil {
+		params.CollectionMethod = stripe.String(equalQuals["collection_method"].GetStringValue())
 	}
-	if exactQuals["subscription_id"] != nil {
-		params.Subscription = stripe.String(exactQuals["subscription_id"].GetStringValue())
+	if equalQuals["subscription_id"] != nil {
+		params.Subscription = stripe.String(equalQuals["subscription_id"].GetStringValue())
 	}
 
 	// Comparison values
 	quals := d.Quals
 
-	plugin.Logger(ctx).Warn("stripe_customer.listInvoice", "quals", quals)
-
 	if quals["created"] != nil {
 		for _, q := range quals["created"].Quals {
 			tsSecs := q.Value.GetTimestampValue().GetSeconds()
-			plugin.Logger(ctx).Warn("stripe_customer.listInvoice", "created.Operator", q.Operator)
-			plugin.Logger(ctx).Warn("stripe_customer.listInvoice", "created.Value", tsSecs)
 			switch q.Operator {
 			case ">":
 				if params.CreatedRange == nil {
@@ -151,6 +153,8 @@ func listInvoice(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 			}
 		}
 	}
+
+	plugin.Logger(ctx).Warn("stripe_invoice.listInvoice", "quals", quals)
 
 	if quals["due_date"] != nil {
 		for _, q := range quals["due_date"].Quals {
@@ -180,23 +184,22 @@ func listInvoice(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 				params.DueDateRange.LesserThan = tsSecs
 			}
 		}
+		plugin.Logger(ctx).Warn("stripe_invoice.listInvoice", "params.DueDateRange.GreaterThanOrEqual", params.DueDateRange.GreaterThanOrEqual)
+		plugin.Logger(ctx).Warn("stripe_invoice.listInvoice", "params.DueDateRange.LesserThan", params.DueDateRange.LesserThan)
 	}
 
 	limit := d.QueryContext.Limit
-	plugin.Logger(ctx).Warn("stripe_customer.listInvoice", "limit", limit)
 	if d.QueryContext.Limit != nil {
 		if *limit < *params.ListParams.Limit {
 			params.ListParams.Limit = limit
 		}
-		plugin.Logger(ctx).Warn("stripe_customer.listInvoice", "limit", *limit)
 	}
 
-	plugin.Logger(ctx).Warn("stripe_customer.listInvoice", "params.ListParams.Limit", *params.ListParams.Limit)
-
 	var count int64
-
 	i := conn.Invoices.List(params)
 	for i.Next() {
+		plugin.Logger(ctx).Warn("stripe_invoice.listInvoice", "id", i.Invoice().ID)
+		plugin.Logger(ctx).Warn("stripe_invoice.listInvoice", "due_date", i.Invoice())
 		d.StreamListItem(ctx, i.Invoice())
 		count++
 		if limit != nil {
@@ -206,7 +209,7 @@ func listInvoice(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		}
 	}
 	if err := i.Err(); err != nil {
-		plugin.Logger(ctx).Error("stripe_customer.listInvoice", "query_error", err, "params", params, "i", i)
+		plugin.Logger(ctx).Error("stripe_invoice.listInvoice", "query_error", err, "params", params, "i", i)
 		return nil, err
 	}
 

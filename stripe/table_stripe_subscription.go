@@ -14,8 +14,15 @@ func tableStripeSubscription(ctx context.Context) *plugin.Table {
 		Name:        "stripe_subscription",
 		Description: "Subscriptions available for purchase or subscription.",
 		List: &plugin.ListConfig{
-			Hydrate:    listSubscription,
-			KeyColumns: plugin.OptionalColumns([]string{"customer_id", "collection_method", "status"}),
+			Hydrate: listSubscription,
+			KeyColumns: []*plugin.KeyColumn{
+				{Name: "collection_method", Require: plugin.Optional},
+				{Name: "customer_id", Require: plugin.Optional},
+				{Name: "created", Operators: []string{">", ">=", "=", "<", "<="}, Require: plugin.Optional},
+				{Name: "current_period_end", Operators: []string{">", ">=", "=", "<", "<="}, Require: plugin.Optional},
+				{Name: "current_period_start", Operators: []string{">", ">=", "=", "<", "<="}, Require: plugin.Optional},
+				{Name: "status", Require: plugin.Optional},
+			},
 		},
 		Get: &plugin.GetConfig{
 			Hydrate:    getSubscription,
@@ -81,14 +88,14 @@ func listSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 
 	// Exact values can leverage optional key quals for optimal caching
 	q := d.KeyColumnQuals
-	if q["status"] != nil {
-		params.Status = q["status"].GetStringValue()
+	if q["customer_id"] != nil {
+		params.Customer = q["customer_id"].GetStringValue()
 	}
 	if q["collection_method"] != nil {
 		params.CollectionMethod = stripe.String(q["collection_method"].GetStringValue())
 	}
-	if q["customer_id"] != nil {
-		params.Customer = q["customer_id"].GetStringValue()
+	if q["status"] != nil {
+		params.Status = q["status"].GetStringValue()
 	}
 
 	// Comparison values
@@ -184,9 +191,23 @@ func listSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		}
 	}
 
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *params.ListParams.Limit {
+			params.ListParams.Limit = limit
+		}
+	}
+
+	var count int64
 	i := conn.Subscriptions.List(params)
 	for i.Next() {
 		d.StreamListItem(ctx, i.Subscription())
+		count++
+		if limit != nil {
+			if count >= *limit {
+				break
+			}
+		}
 	}
 	if err := i.Err(); err != nil {
 		plugin.Logger(ctx).Error("stripe_subscription.listSubscription", "query_error", err, "params", params, "i", i)

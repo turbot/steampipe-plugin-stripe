@@ -14,8 +14,13 @@ func tableStripeProduct(ctx context.Context) *plugin.Table {
 		Name:        "stripe_product",
 		Description: "Products available for purchase or subscription.",
 		List: &plugin.ListConfig{
-			Hydrate:    listProduct,
-			KeyColumns: plugin.OptionalColumns([]string{"active", "created", "shippable", "url"}),
+			Hydrate: listProduct,
+			KeyColumns: []*plugin.KeyColumn{
+				{Name: "active", Operators: []string{"=", "<>"}, Require: plugin.Optional},
+				{Name: "created", Operators: []string{">", ">=", "=", "<", "<="}, Require: plugin.Optional},
+				{Name: "shippable", Operators: []string{"=", "<>"}, Require: plugin.Optional},
+				{Name: "url", Require: plugin.Optional},
+			},
 		},
 		Get: &plugin.GetConfig{
 			Hydrate:    getProduct,
@@ -57,21 +62,36 @@ func listProduct(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		},
 	}
 
-	// Exact values can leverage optional key quals for optimal caching
-	q := d.KeyColumnQuals
-	if q["active"] != nil {
-		params.Active = stripe.Bool(q["active"].GetBoolValue())
-	}
-	if q["shippable"] != nil {
-		params.Shippable = stripe.Bool(q["shippable"].GetBoolValue())
-	}
-	if q["url"] != nil {
+	equalQuals := d.KeyColumnQuals
+	if equalQuals["url"] != nil {
 		// Note: I can't work out how to set and test a URL for a product?
-		params.URL = stripe.String(q["url"].GetStringValue())
+		params.URL = stripe.String(equalQuals["url"].GetStringValue())
 	}
 
-	// Comparison values
 	quals := d.Quals
+
+	if quals["active"] != nil {
+		for _, q := range quals["active"].Quals {
+			switch q.Operator {
+			case "=":
+				params.Active = stripe.Bool(q.Value.GetBoolValue())
+			case "<>":
+				params.Active = stripe.Bool(!q.Value.GetBoolValue())
+			}
+		}
+	}
+
+	if quals["shippable"] != nil {
+		for _, q := range quals["shippable"].Quals {
+			switch q.Operator {
+			case "=":
+				params.Shippable = stripe.Bool(q.Value.GetBoolValue())
+			case "<>":
+				params.Shippable = stripe.Bool(!q.Value.GetBoolValue())
+			}
+		}
+	}
+
 	if quals["created"] != nil {
 		for _, q := range quals["created"].Quals {
 			tsSecs := q.Value.GetTimestampValue().GetSeconds()
@@ -102,12 +122,23 @@ func listProduct(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		}
 	}
 
-	plugin.Logger(ctx).Warn("stripe_customer.listInvoice", "q", q)
-	plugin.Logger(ctx).Warn("stripe_customer.listInvoice", "quals", quals)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *params.ListParams.Limit {
+			params.ListParams.Limit = limit
+		}
+	}
 
+	var count int64
 	i := conn.Products.List(params)
 	for i.Next() {
 		d.StreamListItem(ctx, i.Product())
+		count++
+		if limit != nil {
+			if count >= *limit {
+				break
+			}
+		}
 	}
 	if err := i.Err(); err != nil {
 		plugin.Logger(ctx).Error("stripe_product.listProduct", "query_error", err, "params", params, "i", i)

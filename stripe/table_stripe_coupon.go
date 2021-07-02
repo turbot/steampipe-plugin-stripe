@@ -15,6 +15,9 @@ func tableStripeCoupon(ctx context.Context) *plugin.Table {
 		Description: "Coupons available for purchase or subscription.",
 		List: &plugin.ListConfig{
 			Hydrate: listCoupon,
+			KeyColumns: []*plugin.KeyColumn{
+				{Name: "created", Operators: []string{">", ">=", "=", "<", "<="}, Require: plugin.Optional},
+			},
 		},
 		Get: &plugin.GetConfig{
 			Hydrate:    getCoupon,
@@ -48,20 +51,69 @@ func listCoupon(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 		plugin.Logger(ctx).Error("stripe_coupon.listCoupon", "connection_error", err)
 		return nil, err
 	}
+
 	params := &stripe.CouponListParams{
 		ListParams: stripe.ListParams{
 			Context: ctx,
 			Limit:   stripe.Int64(100),
 		},
 	}
+
+	quals := d.Quals
+
+	if quals["created"] != nil {
+		for _, q := range quals["created"].Quals {
+			tsSecs := q.Value.GetTimestampValue().GetSeconds()
+			switch q.Operator {
+			case ">":
+				if params.CreatedRange == nil {
+					params.CreatedRange = &stripe.RangeQueryParams{}
+				}
+				params.CreatedRange.GreaterThan = tsSecs
+			case ">=":
+				if params.CreatedRange == nil {
+					params.CreatedRange = &stripe.RangeQueryParams{}
+				}
+				params.CreatedRange.GreaterThanOrEqual = tsSecs
+			case "=":
+				params.Created = stripe.Int64(tsSecs)
+			case "<=":
+				if params.CreatedRange == nil {
+					params.CreatedRange = &stripe.RangeQueryParams{}
+				}
+				params.CreatedRange.LesserThanOrEqual = tsSecs
+			case "<":
+				if params.CreatedRange == nil {
+					params.CreatedRange = &stripe.RangeQueryParams{}
+				}
+				params.CreatedRange.LesserThan = tsSecs
+			}
+		}
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *params.ListParams.Limit {
+			params.ListParams.Limit = limit
+		}
+	}
+
+	var count int64
 	i := conn.Coupons.List(params)
 	for i.Next() {
 		d.StreamListItem(ctx, i.Coupon())
+		count++
+		if limit != nil {
+			if count >= *limit {
+				break
+			}
+		}
 	}
 	if err := i.Err(); err != nil {
-		plugin.Logger(ctx).Error("stripe_customer.listCoupon", "query_error", err, "params", params, "i", i)
+		plugin.Logger(ctx).Error("stripe_coupon.listCoupon", "query_error", err, "params", params, "i", i)
 		return nil, err
 	}
+
 	return nil, nil
 }
 
