@@ -154,8 +154,6 @@ func listInvoice(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		}
 	}
 
-	plugin.Logger(ctx).Warn("stripe_invoice.listInvoice", "quals", quals)
-
 	if quals["due_date"] != nil {
 		for _, q := range quals["due_date"].Quals {
 			tsSecs := q.Value.GetTimestampValue().GetSeconds()
@@ -184,8 +182,6 @@ func listInvoice(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 				params.DueDateRange.LesserThan = tsSecs
 			}
 		}
-		plugin.Logger(ctx).Warn("stripe_invoice.listInvoice", "params.DueDateRange.GreaterThanOrEqual", params.DueDateRange.GreaterThanOrEqual)
-		plugin.Logger(ctx).Warn("stripe_invoice.listInvoice", "params.DueDateRange.LesserThan", params.DueDateRange.LesserThan)
 	}
 
 	limit := d.QueryContext.Limit
@@ -198,8 +194,6 @@ func listInvoice(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	var count int64
 	i := conn.Invoices.List(params)
 	for i.Next() {
-		plugin.Logger(ctx).Warn("stripe_invoice.listInvoice", "id", i.Invoice().ID)
-		plugin.Logger(ctx).Warn("stripe_invoice.listInvoice", "due_date", i.Invoice())
 		d.StreamListItem(ctx, i.Invoice())
 		count++
 		if limit != nil {
