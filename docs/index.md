@@ -1,6 +1,6 @@
 ---
 organization: Turbot
-category: ["public cloud"]
+category: ["saas"]
 icon_url: "/images/plugins/turbot/stripe.svg"
 brand_color: "#635BFF"
 display_name: "Stripe"
