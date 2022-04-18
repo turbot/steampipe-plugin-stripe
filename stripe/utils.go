@@ -30,10 +30,8 @@ func connect(_ context.Context, d *plugin.QueryData) (*client.API, error) {
 
 	// But prefer the config
 	stripeConfig := GetConfig(d.Connection)
-	if &stripeConfig != nil {
-		if stripeConfig.APIKey != nil {
-			apiKey = *stripeConfig.APIKey
-		}
+	if stripeConfig.APIKey != nil {
+		apiKey = *stripeConfig.APIKey
 	}
 
 	if apiKey == "" {
