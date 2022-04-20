@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/stripe/stripe-go v70.15.0+incompatible
-	github.com/turbot/steampipe-plugin-sdk v1.8.2
+	github.com/turbot/steampipe-plugin-sdk/v3 v3.1.0
 )
 
 require (
@@ -39,7 +39,6 @@ require (
 	github.com/stevenle/topsort v0.0.0-20130922064739-8130c1d7596b // indirect
 	github.com/tkrajina/go-reflector v0.5.4 // indirect
 	github.com/turbot/go-kit v0.3.0 // indirect
-	github.com/turbot/steampipe-plugin-sdk/v3 v3.1.0 // indirect
 	github.com/zclconf/go-cty v1.10.0 // indirect
 	golang.org/x/net v0.0.0-20201029221708-28c70e62bb1d // indirect
 	golang.org/x/sys v0.0.0-20211102061401-a2f17f7b995c // indirect
