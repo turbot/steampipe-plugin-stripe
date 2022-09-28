@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/stripe/stripe-go v70.15.0+incompatible
-	github.com/turbot/steampipe-plugin-sdk/v4 v4.1.6
+	github.com/turbot/steampipe-plugin-sdk/v4 v4.1.7
 )
 
 require (
