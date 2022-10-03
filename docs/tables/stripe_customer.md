@@ -34,12 +34,12 @@ order by
 select
   id,
   name,
-  account_balance,
+  balance,
   currency
 from
   stripe_customer
 where
-  account_balance < 0
+  balance < 0
 ```
 
 ### All customers with an outstanding balance to add to their next invoice
@@ -48,10 +48,10 @@ where
 select
   id,
   name,
-  account_balance,
+  balance,
   currency
 from
   stripe_customer
 where
-  account_balance > 0
+  balance > 0
 ```
