@@ -1,3 +1,9 @@
+## v0.3.1 [2022-10-03]
+
+_Bug fixes_
+
+- Fixed `account_balance` -> `balance` column names in `stripe_customer` table document examples. ([#19](https://github.com/turbot/steampipe-plugin-stripe/pull/19)) (Thanks to [@fabpot](https://github.com/fabpot) for the fixes!)
+
 ## v0.3.0 [2022-09-28]
 
 _Dependencies_
