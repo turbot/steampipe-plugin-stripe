@@ -5,9 +5,9 @@ import (
 
 	"github.com/stripe/stripe-go"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 func tableStripeInvoice(ctx context.Context) *plugin.Table {
@@ -110,7 +110,7 @@ func listInvoice(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		},
 	}
 
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 	if equalQuals["status"] != nil {
 		params.Status = stripe.String(equalQuals["status"].GetStringValue())
 	}
@@ -216,7 +216,7 @@ func getInvoice(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 		plugin.Logger(ctx).Error("stripe_invoice.getInvoice", "connection_error", err)
 		return nil, err
 	}
-	quals := d.KeyColumnQuals
+	quals := d.EqualsQuals
 	id := quals["id"].GetStringValue()
 	item, err := conn.Invoices.Get(id, &stripe.InvoiceParams{})
 	if err != nil {

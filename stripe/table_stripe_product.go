@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/stripe/stripe-go"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 func tableStripeProduct(ctx context.Context) *plugin.Table {
@@ -62,7 +62,7 @@ func listProduct(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		},
 	}
 
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 	if equalQuals["url"] != nil {
 		// Note: I can't work out how to set and test a URL for a product?
 		params.URL = stripe.String(equalQuals["url"].GetStringValue())
@@ -154,7 +154,7 @@ func getProduct(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 		plugin.Logger(ctx).Error("stripe_product.getProduct", "connection_error", err)
 		return nil, err
 	}
-	quals := d.KeyColumnQuals
+	quals := d.EqualsQuals
 	id := quals["id"].GetStringValue()
 	item, err := conn.Products.Get(id, &stripe.ProductParams{})
 	if err != nil {
