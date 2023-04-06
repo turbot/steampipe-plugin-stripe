@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/stripe/stripe-go"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 func tableStripeSubscription(ctx context.Context) *plugin.Table {
@@ -87,7 +87,7 @@ func listSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	}
 
 	// Exact values can leverage optional key quals for optimal caching
-	q := d.KeyColumnQuals
+	q := d.EqualsQuals
 	if q["customer_id"] != nil {
 		params.Customer = q["customer_id"].GetStringValue()
 	}
@@ -223,7 +223,7 @@ func getSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		plugin.Logger(ctx).Error("stripe_subscription.getSubscription", "connection_error", err)
 		return nil, err
 	}
-	quals := d.KeyColumnQuals
+	quals := d.EqualsQuals
 	id := quals["id"].GetStringValue()
 	item, err := conn.Subscriptions.Get(id, &stripe.SubscriptionParams{})
 	if err != nil {
