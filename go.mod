@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/stripe/stripe-go v70.15.0+incompatible
-	github.com/turbot/steampipe-plugin-sdk/v5 v5.6.0
+	github.com/turbot/steampipe-plugin-sdk/v5 v5.6.1
 )
 
 require (
