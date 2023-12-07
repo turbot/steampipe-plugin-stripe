@@ -16,21 +16,37 @@ The `stripe_product` table provides insights into the various products or servic
 ### List all products
 Explore all available products in your inventory to manage and oversee your product catalog more efficiently. This can help you keep track of your offerings and make strategic decisions based on the comprehensive overview.
 
-```sql
+```sql+postgres
 select
   *
 from
-  stripe_product
+  stripe_product;
+```
+
+```sql+sqlite
+select
+  *
+from
+  stripe_product;
 ```
 
 ### All products that are not active
 Explore which of your Stripe products are currently inactive. This can be useful for identifying items that may need updating or reactivation, helping to ensure your product offerings remain current and relevant.
 
-```sql
+```sql+postgres
 select
   *
 from
   stripe_product
 where
-  not active
+  not active;
+```
+
+```sql+sqlite
+select
+  *
+from
+  stripe_product
+where
+  active = 0;
 ```

@@ -16,20 +16,35 @@ The `stripe_account` table provides insights into the accounts within your Strip
 ### List all accounts
 Explore all your Stripe accounts to gain a comprehensive overview and better manage your online transactions. This could be particularly useful for businesses with multiple accounts, helping to streamline their financial operations.
 
-```sql
+```sql+postgres
 select
   *
 from
-  stripe_account
+  stripe_account;
+```
+
+```sql+sqlite
+select
+  *
+from
+  stripe_account;
 ```
 
 ### Are card payments active for this account?
 Explore whether card payments are enabled for a given account. This can be useful for businesses to ensure they can process card payments and maintain smooth operations.
 
-```sql
+```sql+postgres
 select
   id,
   (capabilities -> 'card_payments')::bool as card_payments
 from
-  stripe_account
+  stripe_account;
+```
+
+```sql+sqlite
+select
+  id,
+  json_extract(capabilities, '$.card_payments') as card_payments
+from
+  stripe_account;
 ```

@@ -16,30 +16,47 @@ The `stripe_coupon` table provides insights into coupons within Stripe. As a bus
 ### List all coupons
 Explore all the promotional coupons available in your system to understand the various discount schemes you offer. This can help in assessing the effectiveness of your marketing strategies and plan future campaigns.
 
-```sql
+```sql+postgres
 select
   *
 from
-  stripe_coupon
+  stripe_coupon;
+```
+
+```sql+sqlite
+select
+  *
+from
+  stripe_coupon;
 ```
 
 ### Coupons that are currently valid
 Explore which coupons are currently active. This can be useful for understanding which promotional offers are available for customers at a given time.
 
-```sql
+```sql+postgres
 select
   id,
   name
 from
   stripe_coupon
 where
-  valid
+  valid;
+```
+
+```sql+sqlite
+select
+  id,
+  name
+from
+  stripe_coupon
+where
+  valid = 1;
 ```
 
 ### Coupons by popularity
 Discover the segments that are most popular based on the number of times they've been redeemed. This can help prioritize marketing efforts and understand customer behavior.
 
-```sql
+```sql+postgres
 select
   id,
   name,
@@ -47,5 +64,16 @@ select
 from
   stripe_coupon
 order by
-  times_redeemed desc
+  times_redeemed desc;
+```
+
+```sql+sqlite
+select
+  id,
+  name,
+  times_redeemed
+from
+  stripe_coupon
+order by
+  times_redeemed desc;
 ```

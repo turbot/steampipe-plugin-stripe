@@ -16,17 +16,24 @@ The `stripe_plan` table provides insights into the pricing plans within Stripe. 
 ### List all plans
 Explore the different plans available in your Stripe account. This can be useful for understanding your billing structure and identifying any plans that may need to be updated or changed.
 
-```sql
+```sql+postgres
 select
   *
 from
-  stripe_plan
+  stripe_plan;
+```
+
+```sql+sqlite
+select
+  *
+from
+  stripe_plan;
 ```
 
 ### List all plans with a trial period
 Discover the segments that offer trial periods in your subscription plans. This can help you assess the elements within your business model that may be contributing to customer acquisition and retention.
 
-```sql
+```sql+postgres
 select
   id,
   nickname,
@@ -34,13 +41,24 @@ select
 from
   stripe_plan
 where
-  trial_period_days > 0
+  trial_period_days > 0;
+```
+
+```sql+sqlite
+select
+  id,
+  nickname,
+  trial_period_days
+from
+  stripe_plan
+where
+  trial_period_days > 0;
 ```
 
 ### List all products with their associated plans
 Explore which products are linked to specific plans, allowing you to analyze the relationship between your offerings and their associated plans for better product management and strategic planning.
 
-```sql
+```sql+postgres
 select
   p.id,
   p.name,
@@ -53,5 +71,21 @@ where
   p.id = pl.product_id
 order by
   p.name,
+  pl.nickname;
+```
+
+```sql+sqlite
+select
+  p.id,
+  p.name,
+  pl.id,
   pl.nickname
+from
+  stripe_product as p,
+  stripe_plan as pl
+where
+  p.id = pl.product_id
+order by
+  p.name,
+  pl.nickname;
 ```

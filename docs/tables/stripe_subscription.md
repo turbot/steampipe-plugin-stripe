@@ -16,17 +16,24 @@ The `stripe_subscription` table provides insights into subscriptions within Stri
 ### List all subscriptions
 Explore all active subscriptions to understand the scope and scale of your service usage. This can aid in assessing revenue streams and identifying potential areas for growth or improvement.
 
-```sql
+```sql+postgres
 select
   *
 from
-  stripe_subscription
+  stripe_subscription;
+```
+
+```sql+sqlite
+select
+  *
+from
+  stripe_subscription;
 ```
 
 ### Subscriptions currently in the trial period
 Explore which subscriptions are presently in their trial period to manage customer engagement and retention strategies effectively. This allows for a timely review of customer behavior and interactions during the trial phase.
 
-```sql
+```sql+postgres
 select
   *
 from
@@ -34,25 +41,45 @@ from
 where
   status = 'trialing'
 order by
-  created desc
+  created desc;
 ```
 
-### Subscriptions set to cancel at the end of this period
-Identify the Stripe subscriptions that are scheduled to cancel at the end of the current billing period. This is useful for understanding your upcoming subscription churn and potentially reaching out to these customers to prevent cancellation.
-
-```sql
+```sql+sqlite
 select
   *
 from
   stripe_subscription
 where
-  cancel_at_period_end
+  status = 'trialing'
+order by
+  created desc;
+```
+
+### Subscriptions set to cancel at the end of this period
+Identify the Stripe subscriptions that are scheduled to cancel at the end of the current billing period. This is useful for understanding your upcoming subscription churn and potentially reaching out to these customers to prevent cancellation.
+
+```sql+postgres
+select
+  *
+from
+  stripe_subscription
+where
+  cancel_at_period_end;
+```
+
+```sql+sqlite
+select
+  *
+from
+  stripe_subscription
+where
+  cancel_at_period_end = 1;
 ```
 
 ### Subscriptions created in the last 7 days
 Discover the segments that have newly subscribed to your service within the past week. This can be useful in understanding recent customer behavior and trends.
 
-```sql
+```sql+postgres
 select
   *
 from
@@ -60,5 +87,16 @@ from
 where
   created > current_timestamp - interval '7 days'
 order by
-  created
+  created;
+```
+
+```sql+sqlite
+select
+  *
+from
+  stripe_subscription
+where
+  created > datetime('now', '-7 days')
+order by
+  created;
 ```
