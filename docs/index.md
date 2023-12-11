@@ -72,7 +72,4 @@ connection "stripe" {
 
 - `api_key` - Your Stripe API key for test or live data.
 
-## Get involved
 
-- Open source: https://github.com/turbot/steampipe-plugin-stripe
-- Community: [Join #steampipe on Slack →](https://turbot.com/community/join)
