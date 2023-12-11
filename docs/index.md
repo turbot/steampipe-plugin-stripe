@@ -8,6 +8,7 @@ short_name: "stripe"
 description: "Steampipe plugin for querying customers, products, invoices and more from Stripe."
 og_description: "Query Stripe with SQL! Open source CLI. No DB required."
 og_image: "/images/plugins/turbot/stripe-social-graphic.png"
+engines: ["steampipe", "sqlite", "postgres", "export"]
 ---
 
 # Stripe + Steampipe
