@@ -8,13 +8,14 @@ short_name: "stripe"
 description: "Steampipe plugin for querying customers, products, invoices and more from Stripe."
 og_description: "Query Stripe with SQL! Open source CLI. No DB required."
 og_image: "/images/plugins/turbot/stripe-social-graphic.png"
+engines: ["steampipe", "sqlite", "postgres", "export"]
 ---
 
 # Stripe + Steampipe
 
 [Stripe](https://stripe.com) provides payment processing software and application programming interfaces (APIs) for e-commerce websites and mobile applications.
 
-[Steampipe](https://steampipe.io) is an open source CLI to instantly query cloud APIs using SQL.
+[Steampipe](https://steampipe.io) is an open-source zero-ETL engine to instantly query cloud APIs using SQL.
 
 For example:
 
@@ -71,7 +72,4 @@ connection "stripe" {
 
 - `api_key` - Your Stripe API key for test or live data.
 
-## Get involved
 
-- Open source: https://github.com/turbot/steampipe-plugin-stripe
-- Community: [Join #steampipe on Slack →](https://turbot.com/community/join)
