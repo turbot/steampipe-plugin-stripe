@@ -48,11 +48,13 @@ func listAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		plugin.Logger(ctx).Error("stripe_account.listAccount", "connection_error", err)
 		return nil, err
 	}
-	item, err := conn.Account.Get()
+
+	item, err := conn.Accounts.Get()
 	if err != nil {
-		plugin.Logger(ctx).Error("stripe_customer.listAccount", "query_error", err)
+		plugin.Logger(ctx).Error("stripe_account.listAccount", "query_error", err)
 		return nil, err
 	}
+
 	d.StreamListItem(ctx, item)
 	return nil, nil
 }
