@@ -28,7 +28,7 @@ func tableStripeInvoice(ctx context.Context) *plugin.Table {
 			Hydrate:    getInvoice,
 			KeyColumns: plugin.SingleColumn("id"),
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Unique identifier for the invoice."},
 			{Name: "number", Type: proto.ColumnType_STRING, Description: "A unique, identifying string that appears on emails sent to the customer for this invoice. This starts with the customer’s unique invoice_prefix if it is specified."},
@@ -91,7 +91,7 @@ func tableStripeInvoice(ctx context.Context) *plugin.Table {
 			{Name: "total_tax_amounts", Type: proto.ColumnType_JSON, Description: "The aggregate amounts calculated per tax rate for all line items."},
 			{Name: "transfer_data", Type: proto.ColumnType_JSON, Description: "The account (if any) the payment will be attributed to for tax reporting, and where funds from the payment will be transferred to for the invoice."},
 			{Name: "webhooks_delivered_at", Type: proto.ColumnType_TIMESTAMP, Transform: transform.FromField("WebhooksDeliveredAt").Transform(transform.UnixToTimestamp), Description: "Invoices are automatically paid or sent 1 hour after webhooks are delivered, or until all webhook delivery attempts have been exhausted. This field tracks the time when webhooks for this invoice were successfully delivered. If the invoice had no webhooks to deliver, this will be set while the invoice is being created."},
-		},
+		}),
 	}
 }
 

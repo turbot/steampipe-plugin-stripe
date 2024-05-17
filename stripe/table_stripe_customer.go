@@ -24,7 +24,7 @@ func tableStripeCustomer(ctx context.Context) *plugin.Table {
 			Hydrate:    getCustomer,
 			KeyColumns: plugin.SingleColumn("id"),
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Unique identifier for the customer."},
 			{Name: "email", Type: proto.ColumnType_STRING, Description: "The customer’s email address."},
@@ -51,7 +51,7 @@ func tableStripeCustomer(ctx context.Context) *plugin.Table {
 			//{Name: "subscriptions", Type: proto.ColumnType_JSON, Transform: transform.FromField("Subscriptions.Data"), Description: "The customer’s current subscriptions, if any."},
 			{Name: "tax_exempt", Type: proto.ColumnType_STRING, Description: "Describes the customer’s tax exemption status. One of none, exempt, or reverse."},
 			{Name: "tax_ids", Type: proto.ColumnType_JSON, Description: "The customer’s tax IDs."},
-		},
+		}),
 	}
 }
 
