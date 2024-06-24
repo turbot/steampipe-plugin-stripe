@@ -23,7 +23,7 @@ func tableStripeCoupon(ctx context.Context) *plugin.Table {
 			Hydrate:    getCoupon,
 			KeyColumns: plugin.SingleColumn("id"),
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Unique identifier for the coupon."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "The coupon’s full name or business name."},
@@ -41,7 +41,7 @@ func tableStripeCoupon(ctx context.Context) *plugin.Table {
 			{Name: "redeem_by", Type: proto.ColumnType_TIMESTAMP, Description: "Date after which the coupon can no longer be redeemed."},
 			{Name: "times_redeemed", Type: proto.ColumnType_INT, Transform: transform.FromField("TimesRedeemed"), Description: "Number of times this coupon has been applied to a customer."},
 			{Name: "valid", Type: proto.ColumnType_BOOL, Description: "Taking account of the above properties, whether this coupon can still be applied to a customer."},
-		},
+		}),
 	}
 }
 

@@ -25,7 +25,7 @@ func tableStripePlan(ctx context.Context) *plugin.Table {
 			Hydrate:    getPlan,
 			KeyColumns: plugin.SingleColumn("id"),
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Unique identifier for the plan."},
 			{Name: "nickname", Type: proto.ColumnType_STRING, Description: "A brief description of the plan, hidden from customers."},
@@ -48,7 +48,7 @@ func tableStripePlan(ctx context.Context) *plugin.Table {
 			{Name: "transform_usage", Type: proto.ColumnType_JSON, Description: "Apply a transformation to the reported usage or set quantity before computing the amount billed."},
 			{Name: "trial_period_days", Type: proto.ColumnType_INT, Transform: transform.FromField("TrialPeriodDays"), Description: "Default number of trial days when subscribing a customer to this plan using trial_from_plan=true."},
 			{Name: "usage_type", Type: proto.ColumnType_STRING, Description: "Configures how the quantity per period should be determined. Can be either metered or licensed. licensed automatically bills the quantity set when adding it to a subscription. metered aggregates the total usage based on usage records. Defaults to licensed."},
-		},
+		}),
 	}
 }
 

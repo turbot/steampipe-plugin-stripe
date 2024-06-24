@@ -13,6 +13,12 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
 			NewInstance: ConfigInstance,
 		},
+		ConnectionKeyColumns: []plugin.ConnectionKeyColumn{
+			{
+				Name:    "account_id",
+				Hydrate: getAccountId,
+			},
+		},
 		DefaultTransform: transform.FromGo().NullIfZero(),
 		DefaultGetConfig: &plugin.GetConfig{
 			ShouldIgnoreError: isNotFoundError,

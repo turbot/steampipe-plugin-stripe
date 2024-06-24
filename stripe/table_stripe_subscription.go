@@ -28,7 +28,7 @@ func tableStripeSubscription(ctx context.Context) *plugin.Table {
 			Hydrate:    getSubscription,
 			KeyColumns: plugin.SingleColumn("id"),
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Unique identifier for the subscription."},
 			{Name: "customer_id", Type: proto.ColumnType_STRING, Transform: transform.FromField("Customer.ID"), Description: "ID of the customer who owns the subscription."},
@@ -68,7 +68,7 @@ func tableStripeSubscription(ctx context.Context) *plugin.Table {
 			{Name: "transfer_data", Type: proto.ColumnType_JSON, Description: "The account (if any) the subscription’s payments will be attributed to for tax reporting, and where funds from each payment will be transferred to for each of the subscription’s invoices."},
 			{Name: "trial_end", Type: proto.ColumnType_TIMESTAMP, Transform: transform.FromField("TrialEnd").Transform(transform.UnixToTimestamp), Description: "If the subscription has a trial, the end of that trial."},
 			{Name: "trial_start", Type: proto.ColumnType_TIMESTAMP, Transform: transform.FromField("TrialStart").Transform(transform.UnixToTimestamp), Description: "If the subscription has a trial, the start of that trial."},
-		},
+		}),
 	}
 }
 

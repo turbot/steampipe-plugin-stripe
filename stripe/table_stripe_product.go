@@ -26,7 +26,7 @@ func tableStripeProduct(ctx context.Context) *plugin.Table {
 			Hydrate:    getProduct,
 			KeyColumns: plugin.SingleColumn("id"),
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Unique identifier for the product."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "The product’s full name or business name."},
@@ -44,7 +44,7 @@ func tableStripeProduct(ctx context.Context) *plugin.Table {
 			{Name: "statement_descriptor", Type: proto.ColumnType_STRING, Description: "Extra information about a product which will appear on your customer’s credit card statement. In the case that multiple products are billed at once, the first statement descriptor will be used."},
 			{Name: "updated", Type: proto.ColumnType_TIMESTAMP, Transform: transform.FromField("Updated").Transform(transform.UnixToTimestamp), Description: "Time at which the product was updated."},
 			{Name: "url", Type: proto.ColumnType_STRING, Description: "A URL of a publicly-accessible webpage for this product."},
-		},
+		}),
 	}
 }
 

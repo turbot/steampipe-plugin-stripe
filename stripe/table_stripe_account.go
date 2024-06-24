@@ -15,7 +15,7 @@ func tableStripeAccount(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listAccount,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Unique identifier for the account."},
 			{Name: "email", Type: proto.ColumnType_STRING, Description: "An email address associated with the account. You can treat this as metadata: it is not used for authentication or messaging account holders."},
@@ -38,17 +38,12 @@ func tableStripeAccount(ctx context.Context) *plugin.Table {
 			{Name: "settings", Type: proto.ColumnType_JSON, Description: "Options for customizing how the account functions within Stripe."},
 			{Name: "tos_acceptance", Type: proto.ColumnType_JSON, Transform: transform.FromField("TOSAcceptance"), Description: "Details on the acceptance of the Stripe Services Agreement."},
 			{Name: "type", Type: proto.ColumnType_STRING, Description: "The Stripe account type. Can be standard, express, or custom."},
-		},
+		}),
 	}
 }
 
-func listAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
-	if err != nil {
-		plugin.Logger(ctx).Error("stripe_account.listAccount", "connection_error", err)
-		return nil, err
-	}
-	item, err := conn.Account.Get()
+func listAccount(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	item, err := getAccount(ctx, d, h)
 	if err != nil {
 		plugin.Logger(ctx).Error("stripe_customer.listAccount", "query_error", err)
 		return nil, err
