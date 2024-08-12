@@ -2,7 +2,7 @@
 
 # Stripe Plugin for Steampipe
 
-Use SQL to query infrastructure including servers, networks, facilities and more from Stripe.
+Use SQL to query customers, products, invoices, subscriptions and more from Stripe.
 
 - **[Get started →](https://hub.steampipe.io/plugins/turbot/stripe)**
 - Documentation: [Table definitions & examples](https://hub.steampipe.io/plugins/turbot/stripe/tables)
