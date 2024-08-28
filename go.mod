@@ -1,12 +1,12 @@
 module github.com/turbot/steampipe-plugin-stripe
 
-go 1.21.0
+go 1.22.4
 
-toolchain go1.21.1
+toolchain go1.22.6
 
 require (
 	github.com/stripe/stripe-go v70.15.0+incompatible
-	github.com/turbot/steampipe-plugin-sdk/v5 v5.10.1
+	github.com/turbot/steampipe-plugin-sdk/v5 v5.10.3
 )
 
 require (
