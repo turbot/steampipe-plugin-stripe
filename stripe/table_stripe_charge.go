@@ -12,7 +12,7 @@ import (
 func tableStripeCharge(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "stripe_charge",
-		Description: "Customer Charge details.",
+		Description: "Retrieves comprehensive details of historical Stripe charges or a specific charge by ID.",
 		List: &plugin.ListConfig{
 			Hydrate: listCharges,
 			KeyColumns: []*plugin.KeyColumn{
