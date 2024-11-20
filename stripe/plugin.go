@@ -25,6 +25,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		},
 		TableMap: map[string]*plugin.Table{
 			"stripe_account":      tableStripeAccount(ctx),
+			"stripe_charge":       tableStripeCharge(ctx),
 			"stripe_coupon":       tableStripeCoupon(ctx),
 			"stripe_customer":     tableStripeCustomer(ctx),
 			"stripe_invoice":      tableStripeInvoice(ctx),
