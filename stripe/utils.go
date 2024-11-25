@@ -5,8 +5,8 @@ import (
 	"errors"
 	"os"
 
-	"github.com/stripe/stripe-go"
-	"github.com/stripe/stripe-go/client"
+	"github.com/stripe/stripe-go/v76"
+	"github.com/stripe/stripe-go/v76/client"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
@@ -39,8 +39,9 @@ func connect(_ context.Context, d *plugin.QueryData) (*client.API, error) {
 		return nil, errors.New("api_key must be configured")
 	}
 
+	maxRetries := int64(10)
 	config := &stripe.BackendConfig{
-		MaxNetworkRetries: 10,
+		MaxNetworkRetries: &maxRetries,
 	}
 
 	conn := &client.API{}

@@ -3,7 +3,7 @@ package stripe
 import (
 	"context"
 
-	"github.com/stripe/stripe-go"
+	"github.com/stripe/stripe-go/v76"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -88,14 +88,19 @@ func listSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 
 	// Exact values can leverage optional key quals for optimal caching
 	q := d.EqualsQuals
-	if q["customer_id"] != nil {
-		params.Customer = q["customer_id"].GetStringValue()
+
+	customerId := q["customer_id"].GetStringValue()
+	if customerId != "" {
+		params.Customer = &customerId
 	}
+
 	if q["collection_method"] != nil {
 		params.CollectionMethod = stripe.String(q["collection_method"].GetStringValue())
 	}
-	if q["status"] != nil {
-		params.Status = q["status"].GetStringValue()
+
+	status := q["status"].GetStringValue()
+	if status != "" {
+		params.Status = &status
 	}
 
 	// Comparison values
@@ -116,7 +121,7 @@ func listSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 				}
 				params.CreatedRange.GreaterThanOrEqual = tsSecs
 			case "=":
-				params.Created = tsSecs
+				params.Created = &tsSecs
 			case "<=":
 				if params.CreatedRange == nil {
 					params.CreatedRange = &stripe.RangeQueryParams{}
