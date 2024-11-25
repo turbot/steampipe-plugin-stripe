@@ -6,7 +6,7 @@ toolchain go1.22.6
 
 require (
 	github.com/stripe/stripe-go/v76 v76.0.0
-	github.com/turbot/steampipe-plugin-sdk/v5 v5.10.0
+	github.com/turbot/steampipe-plugin-sdk/v5 v5.10.4
 )
 
 require (
