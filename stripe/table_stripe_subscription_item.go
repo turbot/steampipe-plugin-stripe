@@ -18,14 +18,14 @@ func tableStripeSubscriptionItem(ctx context.Context) *plugin.Table {
 			KeyColumns: plugin.SingleColumn("subscription_id"),
 			Hydrate:    listSubscriptionItem,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Add columns relevant to SubscriptionItems here
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Unique identifier for the subscription."},
 			{Name: "plan", Type: proto.ColumnType_JSON, Transform: transform.FromField("Plan"), Description: "A plan represents a billing configuration. (Deprecated)"},
 			{Name: "price", Type: proto.ColumnType_JSON, Transform: transform.FromField("Price"), Description: "A price represents a unit cost for a product, specifying the amount, currency, and billing frequency."},
 			{Name: "subscription_id", Type: proto.ColumnType_STRING, Transform: transform.FromField("Subscription"), Description: "The ID of the subscription this item belongs to."},
 			{Name: "usage_record_summaries", Type: proto.ColumnType_JSON, Hydrate: listUsageRecordSummaries, Transform: transform.FromValue()},
-		},
+		}),
 	}
 }
 
