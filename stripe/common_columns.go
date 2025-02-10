@@ -3,7 +3,7 @@ package stripe
 import (
 	"context"
 
-	"github.com/stripe/stripe-go"
+	"github.com/stripe/stripe-go/v76"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/memoize"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -24,12 +24,6 @@ func commonColumns(c []*plugin.Column) []*plugin.Column {
 
 // if the caching is required other than per connection, build a cache key for the call and use it in Memoize.
 var getAccountMemoized = plugin.HydrateFunc(getAccountUncached).Memoize(memoize.WithCacheKeyFunction(getAccountCacheKey))
-
-// declare a wrapper hydrate function to call the memoized function
-// - this is required when a memoized function is used for a column definition
-func getAccount(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	return getAccountMemoized(ctx, d, h)
-}
 
 func getAccountId(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	acc, err := getAccountMemoized(ctx, d, h)
@@ -53,7 +47,7 @@ func getAccountUncached(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, err
 	}
 
-	item, err := conn.Account.Get()
+	item, err := conn.Accounts.Get()
 	if err != nil {
 		plugin.Logger(ctx).Error("stripe_account.listAccount", "query_error", err)
 		return nil, err
