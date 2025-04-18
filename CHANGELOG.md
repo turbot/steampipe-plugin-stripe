@@ -1,5 +1,11 @@
 ## v1.1.0 [2025-04-17]
 
+_What's new?_
+
+- New tables added
+  - [stripe_charge](https://hub.steampipe.io/plugins/turbot/stripe/tables/stripe_charge)
+  - [stripe_subscription_item](https://hub.steampipe.io/plugins/turbot/stripe/tables/stripe_subscription_item)
+
 _Dependencies_
 
 - Recompiled plugin with Go version `1.23.1`. ([#47](https://github.com/turbot/steampipe-plugin-stripe/pull/47))
