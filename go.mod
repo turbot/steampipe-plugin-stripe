@@ -5,7 +5,7 @@ go 1.24
 toolchain go1.24.1
 
 require (
-	github.com/stripe/stripe-go/v76 v76.0.0
+	github.com/stripe/stripe-go/v76 v76.25.0
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.13.1
 )
 
