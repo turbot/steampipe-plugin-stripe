@@ -1052,8 +1052,8 @@ github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o
 github.com/stretchr/testify v1.8.3/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
-github.com/stripe/stripe-go/v76 v76.0.0 h1:XmXcsaznrtrmncLKJhTxwXL78+AHiEO4cqdUITxAp/g=
-github.com/stripe/stripe-go/v76 v76.0.0/go.mod h1:rw1MxjlAKKcZ+3FOXgTHgwiOa2ya6CPq6ykpJ0Q6Po4=
+github.com/stripe/stripe-go/v76 v76.25.0 h1:kmDoOTvdQSTQssQzWZQQkgbAR2Q8eXdMWbN/ylNalWA=
+github.com/stripe/stripe-go/v76 v76.25.0/go.mod h1:rw1MxjlAKKcZ+3FOXgTHgwiOa2ya6CPq6ykpJ0Q6Po4=
 github.com/tkrajina/go-reflector v0.5.6 h1:hKQ0gyocG7vgMD2M3dRlYN6WBBOmdoOzJ6njQSepKdE=
 github.com/tkrajina/go-reflector v0.5.6/go.mod h1:ECbqLgccecY5kPmPmXg1MrHW585yMcDkVl6IvJe64T4=
 github.com/turbot/go-kit v1.1.0 h1:2gW+MFDJD+mN41GcvhAajTrwR8HgN9KKJ8HnYwPGTV0=
