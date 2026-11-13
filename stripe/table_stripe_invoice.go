@@ -5,9 +5,9 @@ import (
 
 	"github.com/stripe/stripe-go/v76"
 
-	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v6/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin/transform"
 )
 
 func tableStripeInvoice(ctx context.Context) *plugin.Table {
@@ -106,8 +106,8 @@ func listInvoice(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		ListParams: stripe.ListParams{
 			Context: ctx,
 			Limit:   stripe.Int64(100),
-			Expand:  stripe.StringSlice([]string{"data.default_payment_method", "data.default_source", "data.subscription"}),
 		},
+		Expand: stripe.StringSlice([]string{"data.default_payment_method", "data.default_source", "data.subscription"}),
 	}
 
 	equalQuals := d.EqualsQuals
@@ -186,8 +186,8 @@ func listInvoice(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
-		if *limit < *params.ListParams.Limit {
-			params.ListParams.Limit = limit
+		if *limit < *params.Limit {
+			params.Limit = limit
 		}
 	}
 
