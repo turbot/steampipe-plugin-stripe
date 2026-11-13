@@ -8,14 +8,14 @@ import (
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/client"
 
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
 )
 
-func connect(_ context.Context, d *plugin.QueryData) (*client.API, error) {
+func connect(ctx context.Context, d *plugin.QueryData) (*client.API, error) {
 
 	// Load connection from cache, which preserves throttling protection etc
 	cacheKey := "stripe"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, cacheKey); ok {
 		return cachedData.(*client.API), nil
 	}
 
@@ -51,7 +51,7 @@ func connect(_ context.Context, d *plugin.QueryData) (*client.API, error) {
 	})
 
 	// Save to cache
-	d.ConnectionManager.Cache.Set(cacheKey, conn)
+	_ = d.ConnectionCache.Set(ctx, cacheKey, conn)
 
 	return conn, nil
 }
